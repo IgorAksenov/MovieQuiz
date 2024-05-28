@@ -4,13 +4,12 @@
 //
 //  Created by  Игорь on 21.05.2024.
 //
-
 import Foundation
-
-
 
 class QuestionFactory: QuestionFactoryProtocol {
     weak var delegate: QuestionFactoryDelegate?
+
+    private var askedQuestions: Set<Int> = []
 
     func setup(delegate: QuestionFactoryDelegate) {
         self.delegate = delegate
@@ -30,11 +29,19 @@ class QuestionFactory: QuestionFactoryProtocol {
     ]
 
     func requestNextQuestion() {
-        guard let index = (0..<questions.count).randomElement() else {
+        let availableIndices = Array(0..<questions.count).filter { !askedQuestions.contains($0) }
+
+        guard let index = availableIndices.randomElement() else {
             delegate?.didReceiveNextQuestion(question: nil)
             return
         }
+
+        askedQuestions.insert(index)
         let question = questions[index]
         delegate?.didReceiveNextQuestion(question: question)
+    }
+
+    func resetAskedQuestions() {
+        askedQuestions.removeAll()
     }
 }

@@ -14,15 +14,15 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
     private var currentQuestion: QuizQuestion?
     private var currentQuestionIndex = 0
     private var correctAnswers = 0
-
+    private var statisticService: StatisticServiceProtocol = StatisticServiceImplementation()
+    
     // MARK: - Lifecycle
     override func viewDidLoad() {
         super.viewDidLoad()
         setupUI()
+        questionFactory.setup(delegate: self)
         showCurrentQuestion()
         imageView.layer.cornerRadius = 20
-        questionFactory.setup(delegate: self)
-        questionFactory.requestNextQuestion()
     }
 
     // MARK: - QuestionFactoryDelegate
@@ -32,7 +32,6 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
         }
         currentQuestion = question
         let questionStep = convert(model: question)
-        show(quizStep: questionStep)
         DispatchQueue.main.async { [weak self] in
             self?.show(quizStep: questionStep)
         }
@@ -112,36 +111,31 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
 
     private func showNextQuestionOrResults() {
         if currentQuestionIndex == questionsAmount - 1 {
-            let text = "Ваш результат: \(correctAnswers)/\(questionsAmount)"
-            showAlert(title: "Этот раунд окончен!", message: text)
-            currentQuestionIndex = 0
-            correctAnswers = 0
+            statisticService.store(correct: correctAnswers, total: questionsAmount)
+            let totalAccuracyString = String(format: "%.2f", statisticService.totalAccuracy)
+            let bestGameDate = DateFormatter.localizedString(from: statisticService.bestGame.date, dateStyle: .short, timeStyle: .short)
+            let message = """
+            Ваш результат: \(correctAnswers)/\(questionsAmount)
+            Количество игр: \(statisticService.gamesCount)
+            Рекорд: \(statisticService.bestGame.correct)/\(questionsAmount) (\(bestGameDate))
+            Средняя точность: \(totalAccuracyString)%
+            """
+            ResultAlertPresenter.show(in: self, title: "Этот раунд окончен!", message: message) { [weak self] in
+                self?.restartQuiz()
+            }
         } else {
             currentQuestionIndex += 1
-            self.questionFactory.requestNextQuestion()
+            questionFactory.requestNextQuestion()
         }
-    }
-
-    private func showAlert(title: String, message: String) {
-        let alert = UIAlertController(
-            title: title,
-            message: message,
-            preferredStyle: .alert
-        )
-
-        alert.addAction(UIAlertAction(title: "Пройти еще раз", style: .default) { [weak self] _ in
-            self?.restartQuiz()
-        })
-        present(alert, animated: true, completion: nil)
     }
 
     private func restartQuiz() {
         currentQuestionIndex = 0
         correctAnswers = 0
+        questionFactory.resetAskedQuestions()
         showCurrentQuestion()
     }
 }
-
 
 /*
  Mock-данные
