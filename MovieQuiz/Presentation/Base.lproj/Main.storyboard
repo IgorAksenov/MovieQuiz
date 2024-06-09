@@ -18,7 +18,7 @@
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" alignment="top" spacing="20" translatesAutoresizingMaskIntoConstraints="NO" id="Wed-3V-RYX" userLabel="Vertical Stack View">
-                                <rect key="frame" x="20" y="58" width="374" height="804"/>
+                                <rect key="frame" x="20" y="58" width="374" height="788"/>
                                 <subviews>
                                     <stackView opaque="NO" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="WBW-AF-lFP" userLabel="Title Stack View">
                                         <rect key="frame" x="0.0" y="0.0" width="374" height="29"/>
@@ -45,7 +45,7 @@
                                         </constraints>
                                     </imageView>
                                     <stackView opaque="NO" contentMode="scaleToFill" alignment="top" translatesAutoresizingMaskIntoConstraints="NO" id="Xgl-xe-CHW">
-                                        <rect key="frame" x="0.0" y="630" width="374" height="94"/>
+                                        <rect key="frame" x="0.0" y="630" width="374" height="78"/>
                                         <subviews>
                                             <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="cTW-ea-9m2">
                                                 <rect key="frame" x="0.0" y="0.0" width="42" height="50"/>
@@ -73,7 +73,7 @@
                                         </subviews>
                                     </stackView>
                                     <stackView opaque="NO" contentMode="scaleToFill" distribution="fillEqually" spacing="20" translatesAutoresizingMaskIntoConstraints="NO" id="00m-bu-MqL" userLabel="Buttons Stack View">
-                                        <rect key="frame" x="0.0" y="744" width="374" height="60"/>
+                                        <rect key="frame" x="0.0" y="728" width="374" height="60"/>
                                         <subviews>
                                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="uhO-ws-ngT" userLabel="No button">
                                                 <rect key="frame" x="0.0" y="0.0" width="177" height="60"/>
@@ -121,6 +121,10 @@
                                     <constraint firstItem="WBW-AF-lFP" firstAttribute="centerX" secondItem="Wed-3V-RYX" secondAttribute="centerX" id="u8h-rl-Zva"/>
                                 </constraints>
                             </stackView>
+                            <activityIndicatorView opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" style="medium" id="Qxb-bP-5Hb">
+                                <rect key="frame" x="197" y="438" width="20" height="20"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                            </activityIndicatorView>
                         </subviews>
                         <viewLayoutGuide key="safeArea" id="6Tk-OE-BBY"/>
                         <color key="backgroundColor" name="YP Black (iOS)"/>
@@ -130,9 +134,12 @@
                             <constraint firstItem="Xgl-xe-CHW" firstAttribute="centerX" secondItem="6Tk-OE-BBY" secondAttribute="centerX" id="S9n-cG-sdJ"/>
                             <constraint firstItem="Wed-3V-RYX" firstAttribute="leading" secondItem="6Tk-OE-BBY" secondAttribute="leading" constant="20" id="mjB-Fk-izS"/>
                             <constraint firstItem="6Tk-OE-BBY" firstAttribute="trailing" secondItem="Wed-3V-RYX" secondAttribute="trailing" constant="20" id="nta-tk-BFK"/>
+                            <constraint firstItem="Qxb-bP-5Hb" firstAttribute="centerY" secondItem="Wed-3V-RYX" secondAttribute="centerY" id="q4X-aq-BY6"/>
+                            <constraint firstItem="Qxb-bP-5Hb" firstAttribute="centerX" secondItem="Wed-3V-RYX" secondAttribute="centerX" id="rzl-3a-l9c"/>
                         </constraints>
                     </view>
                     <connections>
+                        <outlet property="activityIndicator" destination="Qxb-bP-5Hb" id="fre-05-TaB"/>
                         <outlet property="buttonNo" destination="uhO-ws-ngT" id="ZIW-Se-F9i"/>
                         <outlet property="buttonYes" destination="dbZ-r2-tkL" id="btM-Vg-DOf"/>
                         <outlet property="imageView" destination="Ayn-0c-QRd" id="uBA-Ej-I0t"/>
