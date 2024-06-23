@@ -15,9 +15,16 @@ class ResultAlertPresenter {
             preferredStyle: .alert
         )
         
-        alert.addAction(UIAlertAction(title: "Пройти еще раз", style: .default) { _ in
+        // Устанавливаем идентификаторы для элементов алерта
+        alert.title = title
+        alert.message = message
+        alert.view.accessibilityIdentifier = "GameResultsAlert" // Можно также установить на сам алерт
+        
+        let action = UIAlertAction(title: "Пройти еще раз", style: .default) { _ in
             completion()
-        })
+        }
+        action.accessibilityIdentifier = "GameResultsAction" // Идентификатор для кнопки "Пройти еще раз"
+        alert.addAction(action)
         
         viewController.present(alert, animated: true, completion: nil)
     }
