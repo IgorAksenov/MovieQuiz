@@ -36,8 +36,9 @@ class QuestionFactory: QuestionFactoryProtocol {
             }
         }
     }
+    //k_zcuw1ytf
 
-    func requestNextQuestion() {
+   internal func requestNextQuestion() {
         DispatchQueue.global().async { [weak self] in
             guard let self = self else { return }
 
