@@ -5,28 +5,55 @@
 //  Created by  Игорь on 23.06.2024.
 //
 
-
 import UIKit
 
-final class MovieQuizPresenter {
-    let questionsAmount = 10
+final class MovieQuizPresenter: QuestionFactoryDelegate {
+    private weak var viewController: MovieQuizViewControllerProtocol?
+    private let questionsAmount = 10
     private var currentQuestionIndex = 0
     private var correctAnswers = 0
     private var statisticService: StatisticServiceProtocol
     var currentQuestion: QuizQuestion?
-    weak var viewController: MovieQuizViewController?
-    private var questionFactory: QuestionFactoryProtocol?
-
-    init(statisticService: StatisticServiceProtocol) {
-        self.statisticService = StatisticService()
-   
-           
-        }
-
+    var questionFactory: QuestionFactory?
+    
+    init(viewController: MovieQuizViewControllerProtocol) {
+        self.viewController = viewController
+        self.statisticService = StatisticServiceImplementation() // Example, replace with your implementation if needed
+        self.questionFactory = QuestionFactory(moviesLoader: MoviesLoader(), delegate: self)
+        self.questionFactory?.loadData()
+        viewController.showLoadingIndicator()
+    }
+    
     var correctAnswersCount: Int {
         return correctAnswers
     }
 
+    // MARK: - QuestionFactoryDelegate
+    
+    func didLoadDataFromServer() {
+        viewController?.hideLoadingIndicator()
+        questionFactory?.requestNextQuestion()
+    }
+    
+    func didFailToLoadData(with error: Error) {
+        let message = error.localizedDescription
+        viewController?.showNetworkError(message: message)
+    }
+    
+    func didReceiveNextQuestion(question: QuizQuestion?) {
+        guard let question = question else {
+            return
+        }
+        
+        currentQuestion = question
+        let viewModel = convert(model: question)
+        DispatchQueue.main.async { [weak self] in
+            self?.viewController?.show(quiz: viewModel)
+        }
+    }
+    
+    // MARK: - Game Logic
+    
     func convert(model: QuizQuestion) -> QuizStepViewModel {
         let image = UIImage(data: model.image) ?? UIImage()
         return QuizStepViewModel(
@@ -56,39 +83,44 @@ final class MovieQuizPresenter {
     func noButtonClicked() {
         didAnswer(isYes: false)
     }
-    func didAnswer(isCorrectAnswer: Bool) {
-        if isCorrectAnswer {
-            correctAnswers += 1
-        }
-    }
+
     private func didAnswer(isYes: Bool) {
-        viewController?.disableButtonsForOneSecond()
         guard let currentQuestion = currentQuestion else {
             return
         }
 
         let givenAnswer = isYes
         let isCorrect = givenAnswer == currentQuestion.correctAnswer
-        viewController?.showAnswerResult(isCorrect: isCorrect)
+        if isCorrect {
+            correctAnswers += 1
+        }
+
+        viewController?.disableButtons()
+        viewController?.highlightImageBorder(isCorrectAnswer: isCorrect)
+        
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) { [weak self] in
+            guard let self = self else { return }
+            self.viewController?.resetImageViewStyle()
+            self.proceedToNextQuestionOrResults()
+            self.viewController?.enableButtons()
+        }
     }
 
-    func showNextQuestionOrResults() {
-        guard let viewController = viewController else { return }
+    func proceedToNextQuestionOrResults() {
         if isLastQuestion() {
             showQuizResults()
         } else {
             switchToNextQuestion()
-            viewController.requestNextQuestion()
+            questionFactory?.requestNextQuestion()
         }
-        viewController.enableButtons()
     }
 
     private func showQuizResults() {
         guard let viewController = viewController else { return }
         let message = makeResultsMessage()
-        ResultAlertPresenter.show(in: viewController, title: "Этот раунд окончен!", message: message) { [weak self] in
+        ResultAlertPresenter.show(in: viewController as! UIViewController, title: "Этот раунд окончен!", message: message) { [weak self] in
             self?.restartGame()
-            viewController.requestNextQuestion()
+            self?.questionFactory?.requestNextQuestion()
         }
     }
 
@@ -104,16 +136,4 @@ final class MovieQuizPresenter {
         """
         return message
     }
-
-    func didReceiveNextQuestion(question: QuizQuestion?) {
-        guard let question = question else { return }
-        currentQuestion = question
-        let questionStep = convert(model: question)
-        DispatchQueue.main.async { [weak self] in
-            self?.viewController?.show(quizStep: questionStep)
-        }
-    }
-
-    // Изменяем видимость метода didAnswer
-    
 }

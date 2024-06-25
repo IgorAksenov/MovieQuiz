@@ -5,43 +5,40 @@
 //  Created by  Игорь on 17.06.2024.
 //
 
-import XCTest
 
-struct ArithmeticOperations {
-    func addition(num1: Int, num2: Int, handler: @escaping (Int) -> Void) {
-        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
-            handler(num1 + num2)
-        }
-    }
-    
-    func subtraction(num1: Int, num2: Int, handler: @escaping (Int) -> Void) {
-        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
-            handler(num1 - num2)
-        }
-    }
-    
-    func multiplication(num1: Int, num2: Int, handler: @escaping (Int) -> Void) {
-        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
-            handler(num1 * num2)
-        }
-    }
+import XCTest
+@testable import MovieQuiz
+
+// Мок-объект для ViewController
+final class MovieQuizViewControllerMock: MovieQuizViewControllerProtocol {
+    func show(quiz step: QuizStepViewModel) { }
+    func highlightImageBorder(isCorrectAnswer: Bool) { }
+    func showLoadingIndicator() { }
+    func hideLoadingIndicator() { }
+    func showNetworkError(message: String) { }
+    func disableButtons() { }
+    func enableButtons() { }
+    func resetImageViewStyle() { }
 }
-class MovieQuizTests : XCTestCase {
-    func testAddition() throws {
-        // Given
-        let arithmeticOperations = ArithmeticOperations()
-        let num1 = 1
-        let num2 = 2
+
+final class MovieQuizPresenterTests: XCTestCase {
+    func testPresenterConvertModel() throws {
+        // Создаем мок-объект ViewController
+        let viewControllerMock = MovieQuizViewControllerMock()
         
-        // When
-        let expectation = expectation(description: "Addition function expectation")
-       
-       arithmeticOperations.addition(num1: num1, num2: num2) { result in
-            // Then
-            XCTAssertEqual(result, 3)
-            expectation.fulfill()
-        }
+        // Создаем объект MovieQuizPresenter
+        let sut = MovieQuizPresenter(viewController: viewControllerMock)
         
-        waitForExpectations(timeout: 10)
+        // Создаем тестовый вопрос
+        let emptyData = Data()
+        let question = QuizQuestion(image: emptyData, text: "Question Text", correctAnswer: true)
+        
+        // Конвертируем модель в ViewModel
+        let viewModel = sut.convert(model: question)
+        
+        // Проверяем, что ViewModel соответствует ожидаемым значениям
+        XCTAssertNotNil(viewModel.image)
+        XCTAssertEqual(viewModel.question, "Question Text")
+        XCTAssertEqual(viewModel.questionNumber, "1/10")
     }
 }
